@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,7 +19,8 @@ public class Professeur extends Personnel {
     @Column(length = 100)
     private String diplome;
 
-    @OneToMany(mappedBy = "responsable", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "responsable") 
+    @JsonIgnoreProperties("responsable") 
     private List<Module> modules = new ArrayList<>();
 
     // Default Spring boot constructor

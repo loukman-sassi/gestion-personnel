@@ -36,6 +36,10 @@ public class Assistant extends Personnel {
     public Personnel getResponsable() {
         return responsable;
     }
+    
+    public void setResponsable(Personnel personnel) {
+        this.responsable = personnel;
+    }
 
     public void modifierResponsable(Personnel responsable) {
         this.responsable = responsable;

@@ -34,7 +34,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-success btn-block">Enregistrer</button>
-                <a href="index.html" class="btn btn-secondary btn-block">Retour</a>
+                <a href="main.html" class="btn btn-secondary btn-block">Retour</a>
             </form>
         </div>
     </div>
@@ -48,17 +48,15 @@
     const idUrl = urlParams.get('id');
 
     if (idUrl) {
-        document.getElementById("titrePage").innerText = "Modifier Module #" + idUrl;
         document.getElementById("moduleId").value = idUrl;
         chargerDonneesModule(idUrl);
     }
 
-    // 2. Charger les données pour pré-remplir (Mode Modification)
     function chargerDonneesModule(id) {
-        fetch(`${API_URL}/${id}`) // Le backend doit avoir une route GET /api/modules/{id}
+        fetch(`${API_URL}/show/${id}`) 
             .then(res => res.json())
             .then(module => {
-                // On remplit les champs avec les données reçues
+            	document.getElementById("titrePage").innerText = "Modifier Module: " + idUrl;
                 document.getElementById("titre").value = module.titre;
                 document.getElementById("nombreHeuresCours").value = module.nombreHeuresCours;
                 document.getElementById("nombreHeuresTd").value = module.nombreHeuresTd;
@@ -67,13 +65,10 @@
             .catch(err => console.error("Erreur chargement module", err));
     }
 
-    // 3. Gérer la sauvegarde
     document.getElementById("moduleForm").addEventListener("submit", function(event) {
         event.preventDefault(); 
 
         const id = document.getElementById("moduleId").value;
-        
-        // Construction de l'objet JSON correspondant à l'entité Module.java
         const data = {
             titre: document.getElementById("titre").value,
             nombreHeuresCours: parseInt(document.getElementById("nombreHeuresCours").value),
@@ -81,14 +76,13 @@
             nombreHeuresTp: parseInt(document.getElementById("nombreHeuresTp").value)
         };
 
-        let url = API_URL;
+        let url = `${API_URL}/create`;
         let method = "POST";
 
-        // Si on a un ID, c'est une modification (PUT)
         if (id) {
-            url = `${API_URL}/${id}`; // Attention à bien mettre l'ID dans l'URL
-            method = "PUT"; // Assurez-vous que votre Backend gère le PUT sur /api/modules/{id}
-            data.id = id; // On rajoute l'ID dans l'objet au cas où
+            url = `${API_URL}/update/${id}`; 
+            method = "PUT"; 
+            data.id = id; 
         }
 
         fetch(url, {
@@ -101,7 +95,7 @@
         .then(response => {
             if (response.ok) {
                 alert("Module enregistré avec succès !");
-                window.location.href = "index.html"; 
+                window.location.href = "main.html"; 
             } else {
                 alert("Erreur lors de l'enregistrement (Vérifiez la console)");
                 console.error(response);

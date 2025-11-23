@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Formulaire Professeur</title>
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+	<div class="container mt-5">
+		<div class="card col-md-8 offset-md-2">
+			<div class="card-header bg-primary text-white">
+				<h3 id="titrePage">Nouveau Assistant</h3>
+			</div>
+			<div class="card-body">
+				<form id="assistantForm">
+					<input type="hidden" id="assistantId">
+
+					<div class="form-group">
+						<label>Nom</label> <input type="text" id="nom"
+							class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Prénom</label> <input type="text" id="prenom"
+							class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Diplôme</label> <input type="text" id="diplome"
+							class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Date de Naissance</label> <input type="date"
+							id="dateNaissance" class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Responsable (Professeur):</label> <select
+							id="responsableSelect" multiple class="form-control"
+							style="height: 150px;" required>
+							<option value="">Sélectionner un responsable.</option>
+						</select>
+					</div>
+
+					<button type="submit" class="btn btn-success btn-block">Enregistrer</button>
+					<a href="main.html" class="btn btn-secondary btn-block">Annuler</a>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script>
+    const API_URL = "http://localhost:8080/api/assistants";
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const idUrl = urlParams.get('id');
+    
+    if (idUrl) {
+        document.getElementById("assistantId").value = idUrl;
+        chargerDonneesAssistant(idUrl);
+    }
+    
+    function chargerResponsables() {
+        fetch("http://localhost:8080/api/professeurs/index")
+            .then(res => res.json())
+            .then(responsable => {
+                const select = document.getElementById("responsableSelect");
+                responsable.forEach(responsable => {
+                    let option = document.createElement("option");
+                    option.value = responsable.id; 
+                    option.text = `${responsable.nom} ${responsable.prenom}`;
+                    select.appendChild(option);
+                });
+            });
+    }
+
+    function chargerDonneesAssistant(id) {
+        fetch(`${API_URL}/show/${id}`)
+            .then(res => res.json())
+            .then(assistant => {
+                document.getElementById("nom").value = assistant.nom;
+                document.getElementById("prenom").value = assistant.prenom;
+                document.getElementById("diplome").value = assistant.diplome;
+                document.getElementById("dateNaissance").value = assistant.dateNaissance;
+                document.getElementById("titrePage").innerText = "Modifier l'Assistant: " + assistant.nom;
+                
+                if (assistant.responsable) {
+                    document.getElementById("responsableSelect").value = assistant.responsable.id;
+                }
+            });
+    }
+    
+    chargerResponsables();
+
+    document.getElementById("assistantForm").addEventListener("submit", function(event) {
+        event.preventDefault(); 
+
+        const id = document.getElementById("assistantId").value;
+        const idResponsable = document.getElementById("responsableSelect").value;
+        const data = {
+            nom: document.getElementById("nom").value,
+            prenom: document.getElementById("prenom").value,
+            diplome: document.getElementById("diplome").value,
+            dateNaissance: document.getElementById("dateNaissance").value,
+            responsable: {id: idResponsable}
+        };
+
+        let url =`${API_URL}/create`;
+        let method = "POST";
+
+        if (id) {
+            url = `${API_URL}/update/${id}`;
+            method = "PUT";
+            data.id = id; 
+        }
+
+        fetch(url, {
+            method: method,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data) 
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Enregistrement réussi !");
+                window.location.href = "main.html"; 
+            } else {
+                alert("Erreur lors de l'enregistrement");
+            }
+        })
+        .catch(err => console.error(err));
+    });
+</script>
+
+</body>
+</html>
