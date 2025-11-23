@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion Personnels</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Tableau de Bord - Gestion Personnels</h1>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span>Liste des Professeurs</span>
+            <div class="bg-primary text-white d-flex justify-content-end">
+            	<button onclick="chargerProfesseurs()" class="btn btn-sm btn-light text-primary mx-2">Actualiser</button>
+            	<a href="ajouter_professeur.html" class="btn btn-sm btn-light text-primary">Nouveau Professeur</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Diplôme</th>
+                        <th>Actions</th> </tr>
+                </thead>
+                <tbody id="tableProfs">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <span>Liste des Assistants</span>  
+            <div class="bg-info text-white d-flex justify-content-end">
+            	<button onclick="chargerAssistants()" class="btn btn-sm btn-light text-info mx-2">Actualiser</button>
+            	<a href="#" class="btn btn-sm btn-light text-info">Nouveau Assistant</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Diplôme</th>
+                    </tr>
+                </thead>
+                <tbody id="tableAssistants">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <span>Liste des Modules</span>
+            <div class="bg-success text-white d-flex justify-content-end">
+            	<button onclick="chargerModules()" class="btn btn-sm btn-light text-success mx-2">Actualiser</button>
+            	<a href="ajouter_module.html" class="btn btn-sm btn-light text-success">Nouveau Module</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titre</th>
+                        <th>Cours (h)</th>
+                        <th>TD (h)</th> <th>TP (h)</th> <th>Responsable</th>
+                        <th>Actions</th> 
+                    </tr>
+                </thead>
+                <tbody id="tableModules"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8080/api";
+
+    function chargerProfesseurs() {
+        fetch(API_URL + "/professeurs/index")
+            .then(response => response.json())
+            .then(data => {
+                let html = "";
+                data.forEach(professeur => {
+                    html += `
+                        <tr>
+                            <td>${professeur.id}</td>
+                            <td>${professeur.nom}</td>
+                            <td>${professeur.prenom}</td>
+                            <td>${professeur.diplome}</td>
+                            <td>
+                                <a href="ajouter_professeur.html?id=${professeur.id}" class="btn btn-sm btn-warning">Modifier</a>
+                                <button onclick="supprimerProf(${professeur.id})" class="btn btn-sm btn-danger">Supprimer</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                document.getElementById("tableProfs").innerHTML = html;
+            })
+            .catch(error => console.error("Erreur:", error));
+    }
+
+    function supprimerProf(id) {
+        if (confirm("Voulez-vous vraiment supprimer ce professeur ?")) {
+            fetch(API_URL + "/professeurs/delete/" + id, {
+                method: "DELETE"
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Professeur supprimé !");
+                    chargerProfesseurs(); 
+                } else {
+                    alert("Erreur lors de la suppression");
+                }
+            });
+        }
+    }
+    
+    function chargerAssistants() {
+        fetch(API_URL + "/assistants")
+            .then(response => response.json()) 
+            .then(data => {
+                let html = "";
+                data.forEach(p => {
+                    html += `
+                        <tr>
+                            <td>${p.id}</td>
+                            <td>${p.nom}</td>
+                            <td>${p.prenom}</td>
+                            <td>${p.diplome}</td>
+                        </tr>
+                    `;
+                });
+                document.getElementById("tableAssistants").innerHTML = html;
+            })
+            .catch(error => console.error("Erreur:", error));
+    }
+
+    function chargerModules() {
+        fetch(API_URL + "/modules")
+            .then(response => response.json())
+            .then(data => {
+                let html = "";
+                data.forEach(module => {
+                    let nomResponsable = module.responsable ? module.responsable.nom : "Aucun";
+                    html += `
+                        <tr>
+                            <td>${module.idModule}</td> 
+                            <td>${module.titre}</td>
+                            <td>${module.nombreHeuresCours}</td>
+                            <td>${module.nombreHeuresTd}</td>
+                            <td>${module.nombreHeuresTp}</td>
+                            <td><span class="badge badge-info">${nomResponsable}</span></td>
+                            <td>
+                                <a href="ajouter_module.html?id=${module.idModule}" class="btn btn-sm btn-warning">Modifier</a>
+                                <button onclick="supprimerModule(${module.idModule})" class="btn btn-sm btn-danger">Supprimer</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                document.getElementById("tableModules").innerHTML = html;
+            });
+    }
+
+    function supprimerModule(id) {
+        if (confirm("Voulez-vous vraiment supprimer ce module ?")) {
+            fetch(API_URL + "/modules/" + id, { method: "DELETE" })
+            .then(res => {
+                if(res.ok) {
+                    chargerModules(); // Rafraîchir la liste
+                } else {
+                    alert("Erreur suppression");
+                }
+            });
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        chargerProfesseurs();
+        chargerAssistants();
+        chargerModules();
+    });
+</script>
+
+</body>
+</html>

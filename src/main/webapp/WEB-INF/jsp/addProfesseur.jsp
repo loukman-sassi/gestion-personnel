@@ -13,31 +13,34 @@
     <div class="card">
         <div class="card-header">Ajouter un nouveau Professeur</div>
         <div class="card-body">
-            
             <form action="add" method="post">
+            
                 <div class="form-group">
                     <label>Nom :</label>
                     <input type="text" name="nom" class="form-control" required/>
                 </div>
+                
                 <div class="form-group">
                     <label>Prénom :</label>
                     <input type="text" name="prenom" class="form-control" required/>
                 </div>
+                
                 <div class="form-group">
                     <label>Diplôme :</label>
-                    <input type="text" name="diplome" class="form-control"/>
+                    <input type="text" name="diplome" class="form-control" required/>
                 </div>
+                
                 <div class="form-group">
                     <label>Date de Naissance :</label>
-                    <input type="date" name="date" class="form-control"/>
+                    <input type="date" name="date" class="form-control" required/>
                 </div>
-
+                
                 <div class="form-group">
                     <label>Associer des Modules existants :</label>
-                    <select name="idsModules" multiple class="form-control" style="height: 150px;">
+                    <select name="idsModules" multiple class="form-control" style="height: 150px; required">
                         <c:forEach items="${modules}" var="m">
                             <option value="${m.idModule}">
-                                ${m.titre} (Resp: ${m.responsable != null ? m.responsable.nom : 'Aucun'})
+                                ${m.titre} (Resp: ${m.responsable != null ? m.responsable.nom : 'Aucun responsable pour ce module'})
                             </option>
                         </c:forEach>
                     </select>

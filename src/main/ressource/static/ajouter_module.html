@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulaire Module</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="card col-md-8 offset-md-2">
+        <div class="card-header bg-success text-white">
+            <h3 id="titrePage">Ajouter un module</h3>
+        </div>
+        <div class="card-body">
+            <form id="moduleForm">
+                <input type="hidden" id="moduleId">
+
+                <div class="form-group">
+                    <label>Titre</label> 
+                    <input type="text" id="titre" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Totale Heures Cours</label> 
+                    <input type="number" id="nombreHeuresCours" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Totale Heures TD</label> 
+                    <input type="number" id="nombreHeuresTd" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Totale Heures TP</label> 
+                    <input type="number" id="nombreHeuresTp" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-success btn-block">Enregistrer</button>
+                <a href="index.html" class="btn btn-secondary btn-block">Retour</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8080/api/modules";
+    
+    // 1. Vérifier si on est en mode "Modification"
+    const urlParams = new URLSearchParams(window.location.search);
+    const idUrl = urlParams.get('id');
+
+    if (idUrl) {
+        document.getElementById("titrePage").innerText = "Modifier Module #" + idUrl;
+        document.getElementById("moduleId").value = idUrl;
+        chargerDonneesModule(idUrl);
+    }
+
+    // 2. Charger les données pour pré-remplir (Mode Modification)
+    function chargerDonneesModule(id) {
+        fetch(`${API_URL}/${id}`) // Le backend doit avoir une route GET /api/modules/{id}
+            .then(res => res.json())
+            .then(module => {
+                // On remplit les champs avec les données reçues
+                document.getElementById("titre").value = module.titre;
+                document.getElementById("nombreHeuresCours").value = module.nombreHeuresCours;
+                document.getElementById("nombreHeuresTd").value = module.nombreHeuresTd;
+                document.getElementById("nombreHeuresTp").value = module.nombreHeuresTp;
+            })
+            .catch(err => console.error("Erreur chargement module", err));
+    }
+
+    // 3. Gérer la sauvegarde
+    document.getElementById("moduleForm").addEventListener("submit", function(event) {
+        event.preventDefault(); 
+
+        const id = document.getElementById("moduleId").value;
+        
+        // Construction de l'objet JSON correspondant à l'entité Module.java
+        const data = {
+            titre: document.getElementById("titre").value,
+            nombreHeuresCours: parseInt(document.getElementById("nombreHeuresCours").value),
+            nombreHeuresTd: parseInt(document.getElementById("nombreHeuresTd").value),
+            nombreHeuresTp: parseInt(document.getElementById("nombreHeuresTp").value)
+        };
+
+        let url = API_URL;
+        let method = "POST";
+
+        // Si on a un ID, c'est une modification (PUT)
+        if (id) {
+            url = `${API_URL}/${id}`; // Attention à bien mettre l'ID dans l'URL
+            method = "PUT"; // Assurez-vous que votre Backend gère le PUT sur /api/modules/{id}
+            data.id = id; // On rajoute l'ID dans l'objet au cas où
+        }
+
+        fetch(url, {
+            method: method,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data) 
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Module enregistré avec succès !");
+                window.location.href = "index.html"; 
+            } else {
+                alert("Erreur lors de l'enregistrement (Vérifiez la console)");
+                console.error(response);
+            }
+        })
+        .catch(err => console.error(err));
+    });
+</script>
+
+</body>
+</html>

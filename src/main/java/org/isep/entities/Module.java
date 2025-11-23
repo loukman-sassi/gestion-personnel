@@ -2,6 +2,8 @@ package org.isep.entities;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,6 +28,7 @@ public class Module implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "responsable_id")
+    @JsonIgnoreProperties("modules")
     private Professeur responsable;
 
     // Default Spring boot constructor

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Formulaire Professeur</title>
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+	<div class="container mt-5">
+		<div class="card col-md-8 offset-md-2">
+			<div class="card-header bg-primary text-white">
+				<h3 id="titrePage">Nouveau Professeur</h3>
+			</div>
+			<div class="card-body">
+				<form id="profForm">
+					<input type="hidden" id="profId">
+
+					<div class="form-group">
+						<label>Nom</label> <input type="text" id="nom"
+							class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Prénom</label> <input type="text" id="prenom"
+							class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Diplôme</label> <input type="text" id="diplome"
+							class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Date de Naissance</label> <input type="date"
+							id="dateNaissance" class="form-control" required>
+					</div>
+					<div class="form-group">
+						<label>Associer des Modules existants:</label> <select
+							id="modulesSelect" multiple class="form-control"
+							style="height: 150px;" required>
+						</select> <small class="form-text text-muted">Maintenez Ctrl pour
+							sélectionner plusieurs modules.</small>
+					</div>
+
+					<button type="submit" class="btn btn-success btn-block">Enregistrer</button>
+					<a href="index.html" class="btn btn-secondary btn-block">Annuler</a>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script>
+    const API_URL = "http://localhost:8080/api/professeurs";
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const idUrl = urlParams.get('id');
+    
+    if (idUrl) {
+        document.getElementById("profId").value = idUrl;
+        chargerDonneesProf(idUrl);
+    }
+    
+    function chargerModules() {
+        fetch("http://localhost:8080/api/modules/index")
+        
+        
+            .then(res => res.json())
+            .then(modules => {
+                const select = document.getElementById("modulesSelect");
+                modules.forEach(module => {
+                    let option = document.createElement("option");
+                    option.value = module.idModule; 
+                    let respName = module.responsable ? module.responsable.nom : "Aucun responsable";
+                    option.text = `${module.titre} (Resp: ${respName})`;
+                    select.appendChild(option);
+                });
+            });
+    }
+
+    function chargerDonneesProf(id) {
+        fetch(`${API_URL}/show/${id}`)
+            .then(res => res.json())
+            .then(prof => {
+                document.getElementById("nom").value = prof.nom;
+                document.getElementById("prenom").value = prof.prenom;
+                document.getElementById("diplome").value = prof.diplome;
+                document.getElementById("dateNaissance").value = prof.dateNaissance;
+                document.getElementById("titrePage").innerText = "Modifier le Professeur: " + prof.nom;
+            });
+    }
+    
+    chargerModules();
+
+    document.getElementById("profForm").addEventListener("submit", function(event) {
+        event.preventDefault(); 
+
+        const id = document.getElementById("profId").value;
+        
+        const selectElement = document.getElementById("modulesSelect");
+        const selectedModuleIds = Array.from(selectElement.selectedOptions).map(option => parseInt(option.value));
+
+        const data = {
+            nom: document.getElementById("nom").value,
+            prenom: document.getElementById("prenom").value,
+            diplome: document.getElementById("diplome").value,
+            dateNaissance: document.getElementById("dateNaissance").value,
+            idsModules: selectedModuleIds // <--- C'est ici qu'on envoie la liste !
+        };
+
+        let url = API_URL;
+        let method = "POST";
+
+        if (id) {
+            url = `${API_URL}/${id}`;
+            method = "PUT";
+            data.id = id; 
+        }
+
+        fetch(url, {
+            method: method,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data) 
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Enregistrement réussi !");
+                window.location.href = "index.html"; 
+            } else {
+                alert("Erreur lors de l'enregistrement");
+            }
+        })
+        .catch(err => console.error(err));
+    });
+</script>
+
+</body>
+</html>

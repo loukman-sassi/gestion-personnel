@@ -3,6 +3,8 @@ package org.isep.entities;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @PrimaryKeyJoinColumn(name = "id")
 public class Assistant extends Personnel {
@@ -12,6 +14,7 @@ public class Assistant extends Personnel {
 
     @ManyToOne
     @JoinColumn(name = "responsable_id")
+    @JsonIgnoreProperties({"modules", "assistants"})
     private Personnel responsable;
 
     // Default Spring boot constructor
