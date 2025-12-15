@@ -11,6 +11,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 @Entity
 @PrimaryKeyJoinColumn(name = "id")
@@ -20,7 +21,6 @@ public class Professeur extends Personnel {
     private String diplome;
 
     @OneToMany(mappedBy = "responsable") 
-    @JsonIgnoreProperties("responsable") 
     private List<Module> modules = new ArrayList<>();
 
     // Default Spring boot constructor
@@ -46,6 +46,7 @@ public class Professeur extends Personnel {
         this.diplome = diplome;
     }
 
+    @XmlTransient
     public List<Module> getModules() {
         return modules;
     }

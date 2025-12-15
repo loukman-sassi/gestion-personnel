@@ -10,5 +10,8 @@ import org.springframework.data.repository.query.Param;
 public interface ProfesseurRepository extends JpaRepository<Professeur, Long>{
 	@Query("select p from Professeur p where p.nom like :x")
     List<Professeur> findByNom(@Param("x") String mc);
+	
+	@Query("SELECT p FROM Professeur p LEFT JOIN FETCH p.modules")
+    List<Professeur> findAllWithModules();
 
 }
